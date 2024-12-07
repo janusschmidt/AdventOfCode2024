@@ -3,29 +3,40 @@
 var parser = new Parser();
 var input = parser.GetIntArrayOfRowsAsArrays();
 
-var safeCount = CountSafe(input);
+Console.WriteLine($"Safe count part1: {input.Count(CheckSequence)}");
+Console.WriteLine($"Safe count part2: {input.Count(x => MutateRemovingSingleEntries(x).Any(CheckSequence))}");
+return;
 
-Console.WriteLine($"Safe count: {safeCount}");
-
-int CountSafe(int[][] ints)
+IEnumerable<IEnumerable<int>> MutateRemovingSingleEntries(int[] ints)
 {
-    return ints.Count(x => x.Aggregate(
-        new Agg(true, Direction.Unknown, null),
+    yield return ints;
+    foreach (var arr in Tools.MutateRemovingSingleEntries(ints))
+    {
+        yield return arr;
+    }
+}
+
+bool CheckSequence(IEnumerable<int> ints)
+{
+    return ints.Aggregate(
+        new Agg(true),
+    
         (agg, i) =>
         {
-            var (isSafe, direction, previousValue) = agg;
-            var unSafe = new Agg(false, Direction.Unknown, i);
-            var safe = new Agg(true, direction, i);
-            
+            var (isSafe, dir, prev) = agg;
+            var unSafe = new Agg(false);
+            var safe = new Agg(true, dir, i);
+                
             return !isSafe ? agg : 
-                previousValue == null ? safe :
-                previousValue - i == 0 ? unSafe :
-                Math.Abs(previousValue.Value - i) > 3 ? unSafe :
-                direction == Direction.Unknown ? new Agg(true, previousValue - i > 0 ? Direction.Decreasing : Direction.Increasing, i) :
-                previousValue - i > 0 && direction == Direction.Decreasing ? safe :
-                previousValue - i < 0 && direction == Direction.Increasing ? safe :
+                prev == null ? safe :
+                prev - i == 0 ? unSafe :
+                Math.Abs(prev.Value - i) > 3 ? unSafe :
+                dir == Direction.Unknown ? new Agg(true, prev - i > 0 ? Direction.Decreasing : Direction.Increasing, i) :
+                prev - i > 0 && dir == Direction.Decreasing ? safe :
+                prev - i < 0 && dir == Direction.Increasing ? safe :
                 unSafe;
-        }).IsSafe);
+        }
+     ).IsSafe;
 }
 
 enum Direction
@@ -35,4 +46,4 @@ enum Direction
     Unknown
 }
 
-record Agg(bool IsSafe, Direction Direction, int? PreviousValue);
+record Agg(bool IsSafe, Direction Direction = Direction.Unknown, int? PreviousValue = null);
