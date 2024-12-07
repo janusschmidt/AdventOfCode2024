@@ -7,4 +7,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\InputParser\InputParser.csproj" />
+    </ItemGroup>
+
 </Project>
