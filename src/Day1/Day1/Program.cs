@@ -7,4 +7,6 @@ var numbers = input.Select(x => x.Split(" ", StringSplitOptions.RemoveEmptyEntri
 var a1 = numbers.Select(x => int.Parse(x[0])).ToArray();
 var a2 = numbers.Select(x => int.Parse(x[1])).ToArray();
 
-Console.Write(Part1.GetTotal(a1, a2));
+Console.WriteLine($"Distance: {Part1.GetTotalDistance(a1, a2)}");
+
+Console.WriteLine($"Similarity: {Part2.GetTotalSimilarity(a1, a2)}");
