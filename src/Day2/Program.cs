@@ -1,6 +1,6 @@
 ﻿using InputParser;
 
-var input = FileReader.ReadLines().GetIntArrayOfRowsAsArrays();
+var input = FileReader.ReadLines().GetIntArrayOfRows();
 
 Console.WriteLine($"Safe count part1: {input.Count(CheckSequence)}");
 Console.WriteLine($"Safe count part2: {input.Count(x => MutateRemovingSingleEntries(x).Any(CheckSequence))}");

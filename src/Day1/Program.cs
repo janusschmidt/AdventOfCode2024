@@ -1,6 +1,6 @@
 ﻿using InputParser;
 
-var input = FileReader.ReadLines().GetIntArrayOfColumnsAsArrays();
+var input = FileReader.ReadLines().GetIntArrayOfColumns();
 
 Console.WriteLine($"Distance: {GetTotalDistance(input[0], input[1])}");
 Console.WriteLine($"Similarity: {GetTotalSimilarity(input[0], input[1])}");
