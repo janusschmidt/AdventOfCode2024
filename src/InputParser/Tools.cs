@@ -29,4 +29,32 @@ public static class Tools
   public static string ReverseString(this string str) => new(str.Reverse().ToArray());
   
   public static string[] ToStringArray(this string s) => s.Select(y => y.ToString()).ToArray();
+
+  public static string[][] SplitOnEmptyLines(this string[] lines)
+  {
+    List<string[]> sections = [];
+    List<string> agg = [];
+    foreach (var line in lines)
+    {
+      if (line == "")
+      {
+        if (agg.Count != 0)
+        {
+          sections.Add(agg.ToArray());
+          agg = [];
+        }
+        continue;
+      }
+      agg.Add(line);
+    }
+    if (agg.Count != 0)
+      sections.Add(agg.ToArray());
+    
+    return sections.ToArray();
+  }
+
+  public static bool All<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+  {
+    return source.Select(predicate).All(x => x);
+  }
 }
