@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+
 using InputParser;
 
-class Program
+namespace Day6;
+
+static class Program
 {
   public static void Main(string[] args)
   {
@@ -12,7 +15,7 @@ class Program
 
     var initialState = GetInitialState(input);
     var map = GetMap(input, null);
-    var visitedStates = GameLoop(initialState, map);
+    var visitedStates = GameLoop(initialState, map)!;
 
     Console.WriteLine($"Part1 - Number of points: {visitedStates.Select(s => s.Position).Distinct().Count()} ({sw.ElapsedMilliseconds} milliseconds)");
     sw.Restart();
@@ -34,8 +37,8 @@ class Program
 
       var newState = MoveForward(state);
 
-      state = !bounds.IsInBounds(newState) || map[newState.Position.X][newState.Position.Y] == '.' ? 
-        newState : 
+      state = !bounds.IsInBounds(newState) || map[newState.Position.X][newState.Position.Y] == '.' ?
+        newState :
         state with { Direction = TurnRight(state) };
     }
     return visitedStates;
@@ -60,7 +63,7 @@ class Program
       Direction.Left => Direction.Up,
       _ => throw new ArgumentOutOfRangeException()
     };
-  
+
   static State GetInitialState(char[][] cells) => cells
     .SelectMany((x, ix) => x.Select((y, iy) => new State(new Position(ix, iy), ParseDirection(y))))
     .Single(x => x.Direction != Direction.Unknown);
@@ -92,5 +95,5 @@ record Bounds
     maxY = cells[0].Length;
   }
   public bool IsInBounds(State state) => IsInBounds(state.Position);
-  public bool IsInBounds(Position p) => 0 <= p.X && p.X < maxX && 0 <= p.Y && p.Y < maxY;
+  bool IsInBounds(Position p) => 0 <= p.X && p.X < maxX && 0 <= p.Y && p.Y < maxY;
 }

@@ -9,7 +9,7 @@ return;
 IEnumerable<IEnumerable<int>> MutateRemovingSingleEntries(int[] ints)
 {
   yield return ints;
-  foreach (var arr in Tools.MutateRemovingSingleEntries(ints))
+  foreach (var arr in ints.MutateRemovingSingleEntries())
   {
     yield return arr;
   }

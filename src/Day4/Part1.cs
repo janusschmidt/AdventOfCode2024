@@ -2,10 +2,9 @@ using InputParser;
 
 namespace Day4;
 
-public class Part1
+public static class Part1
 {
-
-  public void Count()
+  public static void Count()
   {
     var rows = FileReader.ReadLines();
     var columns = rows.GetColumnsAsStrings("");
@@ -29,10 +28,10 @@ public class Part1
 
     Console.WriteLine($"Part 1 Sum: {Sum(horizontal, vertical, verticalIndented, verticalIndentedReverse)}");
   }
-  
-  int CountXmas(string s) => s.Split("XMAS").Length - 1;
 
-  (int normalCount, int reverseCount) Count(string[] strings)
+  static int CountXmas(string s) => s.Split("XMAS").Length - 1;
+
+  static (int normalCount, int reverseCount) Count(string[] strings)
   {
     var count = strings.Sum(CountXmas);
     var countReverse = strings.Select(x => x.ReverseString()).Sum(CountXmas);
@@ -43,5 +42,5 @@ public class Part1
     return (normalCount: count, reverseCount: countReverse);
   }
 
-  int Sum(params (int normalCount, int reverseCount)[]  c) => c.Sum(x => x.normalCount + x.reverseCount); 
+  static int Sum(params (int normalCount, int reverseCount)[]  c) => c.Sum(x => x.normalCount + x.reverseCount);
 }

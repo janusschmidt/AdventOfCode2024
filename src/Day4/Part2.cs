@@ -2,9 +2,9 @@ using InputParser;
 
 namespace Day4;
 
-public class Part2
+public static class Part2
 {
-  public void Count()
+  public static void Count()
   {
     var lines = FileReader.ReadLines();
     var arr = lines.GetRowsAsStringArrays("");
@@ -14,7 +14,7 @@ public class Part2
     {
       if (arr[i][j] != "A")
         continue;
-      
+
       var diag1 = arr[i-1][j-1] + arr[i+1][j+1];
       var diag2 = arr[i-1][j+1] + arr[i+1][j-1];
 

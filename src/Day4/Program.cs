@@ -1,6 +1,6 @@
 ﻿using Day4;
 
-new Part1().Count();
-new Part2().Count();
+Part1.Count();
+Part2.Count();
 
 

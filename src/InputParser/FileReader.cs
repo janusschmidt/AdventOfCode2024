@@ -1,6 +1,6 @@
 namespace InputParser;
 
-public class FileReader
+public static class FileReader
 {
   public static string[] ReadLines(string filename = "input.txt")
   {
