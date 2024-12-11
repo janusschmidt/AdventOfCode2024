@@ -5,25 +5,27 @@ class Program
 {
   public static void Main(string[] args)
   {
+    var sw = Stopwatch.StartNew();
+
     //var input = FileReader.ReadLines("test.txt").Select(x => x.Select(y => y).ToArray()).ToArray();
     var input = FileReader.ReadLines().Select(x => x.Select(y => y).ToArray()).ToArray();
-    var sw = Stopwatch.StartNew();
-    var visitedStates = GameLoop(input);
-    
+
+    var initialState = GetInitialState(input);
+    var map = GetMap(input, null);
+    var visitedStates = GameLoop(initialState, map);
+
     Console.WriteLine($"Part1 - Number of points: {visitedStates.Select(s => s.Position).Distinct().Count()} ({sw.ElapsedMilliseconds} milliseconds)");
     sw.Restart();
 
-    var possibleLoopStates = visitedStates.GroupBy(x => x.Position).AsParallel().Select(x => GameLoop(input, x.Key));
+    var possibleLoopStates = visitedStates.GroupBy(x => x.Position).AsParallel().Select(x => GameLoop(initialState, GetMap(input, x.Key)));
     Console.WriteLine($"Part2 - Number of possible loop generating positions: {possibleLoopStates.Count(x => x is null)} ({sw.ElapsedMilliseconds} milliseconds)");
   }
 
-  static HashSet<State>? GameLoop(char[][] input, Position obstruction = null)
+  static HashSet<State>? GameLoop(State initialState, char[][] map)
   {
-    var state = GetInitialState(input);
-
-    var map = GetMap(input, obstruction);
     var bounds = new Bounds(map);
-    
+
+    var state = initialState;
     HashSet<State> visitedStates = [];
     while (bounds.IsInBounds(state))
     {
