@@ -1,44 +1,38 @@
-﻿using InputParser;
-
-//var input = FileReader.ReadLines("test.txt").Select(x => x.Select(y => y).ToArray()).ToArray();
+﻿using System.Diagnostics;
+using InputParser;
 
 class Program
 {
   public static void Main(string[] args)
   {
+    //var input = FileReader.ReadLines("test.txt").Select(x => x.Select(y => y).ToArray()).ToArray();
     var input = FileReader.ReadLines().Select(x => x.Select(y => y).ToArray()).ToArray();
+    var sw = Stopwatch.StartNew();
     var visitedStates = GameLoop(input);
-    Console.WriteLine($"Part1 - Number of points: {visitedStates.Select(s => (s.X, s.Y)).Distinct().Count()}");
+    
+    Console.WriteLine($"Part1 - Number of points: {visitedStates.Select(s => s.Position).Distinct().Count()} ({sw.ElapsedMilliseconds} milliseconds)");
+    sw.Restart();
+
+    var possibleLoopStates = visitedStates.GroupBy(x => x.Position).AsParallel().Select(x => GameLoop(input, x.Key));
+    Console.WriteLine($"Part2 - Number of possible loop generating positions: {possibleLoopStates.Count(x => x is null)} ({sw.ElapsedMilliseconds} milliseconds)");
   }
 
-  static State GetInitialState(char[][] cells) => cells
-    .SelectMany((x, ix) => x.Select((y, iy) => new State(ix, iy, GetDirection(y))))
-    .Single(x => x.Direction != Direction.Unknown);
-
-  static Direction GetDirection(char c) => c switch
-  {
-    '^' => Direction.Up,
-    '>' => Direction.Right,
-    'v' => Direction.Down,
-    '<' => Direction.Left,
-    _ => Direction.Unknown
-  };
-
-  static char[][] ClearGuardFromInput(char[][] chars) => chars.Select(x => x.Select(y => "^<>v.".Contains(y) ? '.' : '#').ToArray()).ToArray();
-  
-  static HashSet<State> GameLoop(char[][] input)
+  static HashSet<State>? GameLoop(char[][] input, Position obstruction = null)
   {
     var state = GetInitialState(input);
-    input = ClearGuardFromInput(input);
-    var bounds = new Bounds(input);
+
+    var map = GetMap(input, obstruction);
+    var bounds = new Bounds(map);
     
     HashSet<State> visitedStates = [];
     while (bounds.IsInBounds(state))
     {
-      visitedStates.Add(state);
+      if (!visitedStates.Add(state))
+        return null;
+
       var newState = MoveForward(state);
 
-      state = !bounds.IsInBounds(newState) || input[newState.X][newState.Y] == '.' ? 
+      state = !bounds.IsInBounds(newState) || map[newState.Position.X][newState.Position.Y] == '.' ? 
         newState : 
         state with { Direction = TurnRight(state) };
     }
@@ -48,10 +42,10 @@ class Program
   static State MoveForward(State state) =>
     state.Direction switch
     {
-      Direction.Up => state with { X = state.X - 1 },
-      Direction.Down => state with { X = state.X + 1 },
-      Direction.Left => state with { Y = state.Y - 1 },
-      Direction.Right => state with { Y = state.Y + 1 },
+      Direction.Up => state with { Position = state.Position with { X = state.Position.X - 1 }},
+      Direction.Down => state with { Position = state.Position with { X = state.Position.X + 1 }},
+      Direction.Left => state with { Position = state.Position with { Y = state.Position.Y - 1 }},
+      Direction.Right => state with { Position = state.Position with { Y = state.Position.Y + 1 }},
       _ => throw new ArgumentOutOfRangeException()
     };
 
@@ -64,11 +58,27 @@ class Program
       Direction.Left => Direction.Up,
       _ => throw new ArgumentOutOfRangeException()
     };
+  
+  static State GetInitialState(char[][] cells) => cells
+    .SelectMany((x, ix) => x.Select((y, iy) => new State(new Position(ix, iy), ParseDirection(y))))
+    .Single(x => x.Direction != Direction.Unknown);
+
+  static Direction ParseDirection(char c) => c switch
+  {
+    '^' => Direction.Up,
+    '>' => Direction.Right,
+    'v' => Direction.Down,
+    '<' => Direction.Left,
+    _ => Direction.Unknown
+  };
+
+  static char[][] GetMap(char[][] chars, Position? obstruction) => chars.Select((x, ix) => x.Select((y, iy) =>
+    "^<>v".Contains(y) || y == '.'  && (obstruction is null || obstruction.X != ix || obstruction.Y != iy) ? '.' : '#').ToArray()).ToArray();
 }
 
 enum Direction { Up, Down, Left, Right, Unknown }
-record State(int X, int Y, Direction Direction);
-
+record Position(int X, int Y);
+record State(Position Position, Direction Direction);
 record Bounds
 {
   readonly int maxX;
@@ -79,5 +89,6 @@ record Bounds
     maxX = cells.Length;
     maxY = cells[0].Length;
   }
-  public bool IsInBounds(State state) => 0 <= state.X && state.X < maxX && 0 <= state.Y && state.Y < maxY;
+  public bool IsInBounds(State state) => IsInBounds(state.Position);
+  public bool IsInBounds(Position p) => 0 <= p.X && p.X < maxX && 0 <= p.Y && p.Y < maxY;
 }
