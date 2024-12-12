@@ -57,4 +57,10 @@ public static class Tools
   {
     return source.Select(predicate).All(x => x);
   }
+
+  public static (T x, T y)[] CartesianProduct<T>(this IEnumerable<T> s) where T : IComparable<T>
+  {
+    var a = s.ToArray();
+    return a.SelectMany(x => a.Where(y => y.CompareTo(x) < 0).Select(y => (x, y)).ToArray()).ToArray();
+  }
 }
