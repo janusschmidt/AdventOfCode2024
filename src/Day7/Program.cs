@@ -16,36 +16,49 @@ static class Program
     var equations = input.Select(ParseEquation).ToArray();
     var maxOperands = equations.Select(x => x.Operands.Length).Max();
 
+    var powers = Enumerable.Range(0, 10).ToDictionary(x => x, x => (long) Math.Pow(10, x));
     Operator[] operatorsPart1 = [new((i, j) => i + j), new((i, j) => i * j)];
-    var operatorsPart2 = operatorsPart1.Concat([new((i, j) => long.Parse(i.ToString() + j.ToString()))]).ToArray();
+    var operatorsPart2 = operatorsPart1.Concat([new((i, j) => i * powers[LengthOfLong(j)] + j)]).ToArray();
 
+    
     CalculateSum(maxOperands, operatorsPart1, equations, sw);
     CalculateSum(maxOperands, operatorsPart2, equations, sw);
 
-    // Sum: 6392012777720 (504 milliseconds)
-    // Sum: 61561126043536 (9268 milliseconds)
+    // Sum: 1298300076754 (127 milliseconds)
+    // Sum: 248427118972289 (908 milliseconds)
   }
+
+  static int LengthOfLong(long l) => (int)Math.Log10(l) + 1;
 
   static void CalculateSum(int maxOperands, Operator[] operators, Equation[] equations, Stopwatch sw)
   {
     sw.Restart();
-    var combinationsOfDifferentLengths = Enumerable.Range(1, maxOperands).Select(l => Combinations(l, operators)).ToArray();
-    var sum = equations.Where(equation => CheckEquation(equation, combinationsOfDifferentLengths)).Sum(x => x.Sum);
+    var combinationsOfDifferentLengths = Combinations(maxOperands, operators).ToArray();
+    var sum = equations.Where(equation => CheckEquation(equation, combinationsOfDifferentLengths, operators.Length)).Sum(x => x.Sum);
     Console.WriteLine($"Sum: {sum} ({sw.ElapsedMilliseconds} milliseconds)");
   }
 
-  static bool CheckEquation(Equation e, IEnumerable<IEnumerable<Operator>>[] combinationsOfDifferentLengths)
+  static bool CheckEquation(Equation e, Operator[][] combinationsOfDifferentLengths, int numberOfOperators)
   {
-    return combinationsOfDifferentLengths[e.Operands.Length-1].AsParallel().Any(
-      c => c.Aggregate((sum: (long)0, Index: 0), (agg, op) => (sum: op.Calculate(agg.sum,  e.Operands[agg.Index]), Index: agg.Index + 1)).sum == e.Sum);
+    return combinationsOfDifferentLengths[..(int)Math.Pow(numberOfOperators, e.Operands.Length - 1)].Any(
+      c =>
+      {
+        var sum = e.Operands[0];
+        for(var i = 0; i < e.Operands.Length - 1; i++)
+        {
+          sum = c[i].Calculate(sum, e.Operands[i + 1]); 
+        }
+        return sum == e.Sum;
+      });
   }
 
-  static IEnumerable<IEnumerable<Operator>> Combinations(int depth, Operator[] operators)
+
+  static Operator[][] Combinations(int depth, Operator[] operators)
   {
     if (depth <= 1)
-      return operators.Select(x => new[] {x});
+      return operators.Select(x => new[] {x}).ToArray();
 
-    return Combinations(depth-1, operators).SelectMany(c => operators.Select(o => c.Concat([o])));
+    return Combinations(depth-1, operators).SelectMany(c => operators.Select(o => new [] {o}.Concat(c).ToArray())).ToArray();
   }
 
   static Equation ParseEquation(string line)
