@@ -52,7 +52,6 @@ static class Program
       });
   }
 
-
   static Operator[][] Combinations(int depth, Operator[] operators)
   {
     if (depth <= 1)

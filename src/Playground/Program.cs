@@ -7,5 +7,17 @@ Console.WriteLine(Vector<int>.Count);
 Console.WriteLine(a);
 Console.WriteLine(b);
 var dims = Vector.LessThan(a,b);
-		
 Console.WriteLine(dims);
+
+int[] ints = [1, 2, 3, 4, 5, 0, 0, 0, -1, -1];
+var expandedReverse = new Stack<int>(ints.Where(x => x != -1));
+var maxFreeSlotsToFill = expandedReverse.SkipWhile(x => x == -1);//.Count(x => x == -1);
+
+for (var i = 1; i < 1; i+=2)
+{
+  Console.WriteLine("UPS");
+}
+foreach (var i in maxFreeSlotsToFill)
+{
+  Console.WriteLine(i);  
+}

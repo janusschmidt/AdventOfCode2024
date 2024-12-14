@@ -63,4 +63,23 @@ public static class Tools
     var a = s.ToArray();
     return a.SelectMany(x => a.Where(y => y.CompareTo(x) < 0).Select(y => (x, y)).ToArray()).ToArray();
   }
+  
+  public static IEnumerable<(int start, int length, T value)> GroupByBlocksOfEqualElements<T>(this T[] disk) where T : IEquatable<T>
+  {
+    if (disk.Length==0) 
+      yield break;
+    
+    var currentFileId = disk[0];
+    var startPos = 0;
+    for(var i = 0; i < disk.Length; i++)
+    {
+      if (disk[i].Equals(currentFileId)) 
+        continue;
+      
+      if (i != 0) yield return (startPos, i - startPos, currentFileId);
+      currentFileId = disk[i];
+      startPos = i;
+    }
+    yield return (startPos, disk.Length - startPos, currentFileId);
+  }
 }
