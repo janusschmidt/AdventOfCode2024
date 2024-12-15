@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using InputParser;
 
 Vector<int> a = Vector<int>.Zero.WithElement(0,1).WithElement(1,2);
 Vector<int> b = Vector<int>.Zero.WithElement(0,0).WithElement(1,3);
@@ -21,3 +22,8 @@ foreach (var i in maxFreeSlotsToFill)
 {
   Console.WriteLine(i);  
 }
+
+// for (int i = 0; i < 1001; i+=5)
+// {
+//   Console.WriteLine($"{i}: {i.NumberOfDigits()}");
+// }

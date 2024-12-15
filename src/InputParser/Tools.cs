@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace InputParser;
 
 public static class Tools
@@ -22,7 +24,11 @@ public static class Tools
 
   public static string[] GetColumnsAsStrings(this string[] lines, string delimiter=" ") => GetColumnsAsStringArrays(lines, delimiter).Select(x => string.Concat(x)).ToArray();
 
-  public static int[][] GetIntArrayOfRows(this string[] lines, string delimiter=" ") => GetRowsAsStringArrays(lines, delimiter).Select(x => x.Select(int.Parse).ToArray()).ToArray();
+  public static int[][] GetIntArrayOfRows(this string[] lines, string delimiter=" ") => GetArrayOfRows(lines, int.Parse, delimiter);
+  public static long[][] GetLongArrayOfRows(this string[] lines, string delimiter=" ") => GetArrayOfRows(lines, long.Parse, delimiter);
+  
+  public static T[][] GetArrayOfRows<T>(this string[] lines, Func<string, T> parse, string delimiter=" ") => GetRowsAsStringArrays(lines, delimiter).Select(x => x.Select(parse).ToArray()).ToArray();
+  
 
   public static int[][] GetIntArrayOfColumns(this string[] lines, string delimiter=" ") => GetColumnsAsStringArrays(lines, delimiter).Select(x => x.Select(s => int.Parse(s ?? "0")).ToArray()).ToArray();
 
@@ -64,7 +70,7 @@ public static class Tools
     return a.SelectMany(x => a.Where(y => y.CompareTo(x) < 0).Select(y => (x, y)).ToArray()).ToArray();
   }
   
-  public static IEnumerable<(int start, int length, T value)> GroupByBlocksOfContiguosEqualElements<T>(this T[] disk) where T : IEquatable<T>
+  public static IEnumerable<(int start, int length, T value)> GroupByBlocksOfContiguousEqualElements<T>(this T[] disk) where T : IEquatable<T>
   {
     if (disk.Length==0) 
       yield break;
@@ -81,5 +87,15 @@ public static class Tools
       startPos = i;
     }
     yield return (startPos, disk.Length - startPos, currentFileId);
+  }
+
+  public static int NumberOfDigits(this int i) => i switch { 0 => 1, _ => (int)Math.Log10(i) + 1 };
+  public static int NumberOfDigits(this long i) => i switch { 0 => 1, _ => (int)Math.Log10(i) + 1 };
+  
+  public static string TimeStamp(this Stopwatch sw)
+  {
+    var elapsedMs = sw.ElapsedMilliseconds;
+    sw.Restart();
+    return $"({elapsedMs}ms)";
   }
 }
