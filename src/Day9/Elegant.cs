@@ -22,7 +22,7 @@ static class Elegant
     return disk;
   }
 
-  public static IEnumerable<ArraySegment<long>> GroupByBlocks(long[] disk) => disk.GroupByBlocksOfEqualElements().Select(x => new ArraySegment<long>(disk, x.start, x.length));
+  public static IEnumerable<ArraySegment<long>> GroupByBlocks(long[] disk) => disk.GroupByBlocksOfContiguosEqualElements().Select(x => new ArraySegment<long>(disk, x.start, x.length));
   
 
   public static IEnumerable<ArraySegment<long>> GroupBySectors(long[] disk) => disk.Select((_,i) => new ArraySegment<long>(disk, i, 1));

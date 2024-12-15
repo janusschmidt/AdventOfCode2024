@@ -64,7 +64,7 @@ public static class Tools
     return a.SelectMany(x => a.Where(y => y.CompareTo(x) < 0).Select(y => (x, y)).ToArray()).ToArray();
   }
   
-  public static IEnumerable<(int start, int length, T value)> GroupByBlocksOfEqualElements<T>(this T[] disk) where T : IEquatable<T>
+  public static IEnumerable<(int start, int length, T value)> GroupByBlocksOfContiguosEqualElements<T>(this T[] disk) where T : IEquatable<T>
   {
     if (disk.Length==0) 
       yield break;
