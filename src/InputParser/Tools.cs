@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 
 namespace InputParser;
 
@@ -111,5 +112,12 @@ public static class Tools
     {
       action(i);
     }
+  }
+  
+  public static IEnumerable<BigInteger> Range(BigInteger start, BigInteger count)
+  {
+    var max = start + count;
+    for (var i = start; i < max; i++)
+      yield return i;
   }
 }
