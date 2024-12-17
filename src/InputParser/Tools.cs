@@ -98,4 +98,18 @@ public static class Tools
     sw.Restart();
     return $"({elapsedMs}ms)";
   }
+  
+  public static void Repeat(int count, Action<int> action)
+  {
+    for (var i = 0; i < count; i++)
+      action(i);
+  }
+
+  public static void Do<T>(this IEnumerable<T> seq, Action<T> action)
+  {
+    foreach (var i in seq)
+    {
+      action(i);
+    }
+  }
 }

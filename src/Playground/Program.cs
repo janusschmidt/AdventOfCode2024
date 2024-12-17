@@ -23,6 +23,7 @@ foreach (var i in maxFreeSlotsToFill)
   Console.WriteLine(i);  
 }
 
+Console.WriteLine($" (-3 + 10) modulo 10 {(-3 + 10) % 10}");
 // for (int i = 0; i < 1001; i+=5)
 // {
 //   Console.WriteLine($"{i}: {i.NumberOfDigits()}");
