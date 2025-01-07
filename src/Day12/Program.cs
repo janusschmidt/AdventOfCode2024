@@ -9,31 +9,44 @@ static class Program
   {
     var sw = Stopwatch.StartNew();
     var rows = FileReader.ReadLines().GetRowsAsStringArrays("");
-    var regions = ParseRegions(rows);
+    var regions = ParseRegions(rows).ToArray();
 
-    Console.WriteLine($"Part1: Fence price {ComputePrice(regions)}  {sw.TimeStamp()}");
+    var part1Price = regions.Sum(x => x.Length * x.Sum(p => p.sides.Length));
+    Console.WriteLine($"Part1: Fence price {part1Price}  {sw.TimeStamp()}"); // 1450422
+    
+    var part2Price = regions.Sum(r => r.Length * r.Sum(p => CalcSidesPart2(p, r)));
+    Console.WriteLine($"Part2: Fence price {part2Price}  {sw.TimeStamp()}"); // 906606
   }
 
-  static int ComputePrice(IEnumerable<(int perimeter, int area, string letter)> regions) => regions.Sum(x => x.area * x.perimeter);
+  static int CalcSidesPart2(((int row, int col) p, Side[] sides) plot, ((int row, int col) p, Side[] sides)[] region)
+  {
+    return plot.sides.Count(s =>
+      s is Side.Bottom or Side.Top && !region.Any(p2 => p2.p.row == plot.p.row && p2.p.col == plot.p.col - 1 && p2.sides.Any(s2 => s2 == s)) || 
+      s is Side.Left or Side.Right && !region.Any(p2 => p2.p.row == plot.p.row - 1 && p2.p.col == plot.p.col && p2.sides.Any(s2 => s2 == s))
+    );
+  }
 
-  static IEnumerable<(int perimeter, int area, string letter)> ParseRegions(string[][] raw)
+  static IEnumerable<((int row, int col) p, Side[] sides)[]> ParseRegions(string[][] raw)
   {
     var rows = raw.Select(r => r.Select(c => (value: c, visited: false)).ToArray()).ToArray();
 
     var numberOfRows = rows.Length;
     var numberOfCols = rows[0].Length;
 
-    for (int i = 0; i < numberOfRows; i++)
+    for (var i = 0; i < numberOfRows; i++)
     {
-      for (int j = 0; j < numberOfCols; j++)
+      for (var j = 0; j < numberOfCols; j++)
       {
-        if (!rows[i][j].visited)
-          yield return GetRegion(i, j, rows);
+        if (rows[i][j].visited) 
+          continue;
+        
+        yield return GetRegion(i, j, rows);
       }
     }
   }
 
-  static (int perimeter, int area, string letter) GetRegion(int i, int j, (string value, bool visited)[][] rows)
+
+  static ((int row, int col) p, Side[] sides)[] GetRegion(int i, int j, (string value, bool visited)[][] rows)
   {
     var letter = rows[i][j].value;
     var plotsToProcess = new Queue<(int row, int col)>();
@@ -47,22 +60,22 @@ static class Program
       AddNeighbourPlotsOfSameType(current, rows, letter, plotsToProcess);
     }
 
-    var perimeter = plotsInRegion.Sum(x => NumberOfSides(x, plotsInRegion, rows.Length, rows[0].Length));
-    var area = plotsInRegion.Count;
-    return (perimeter, area, letter);
-
+    return plotsInRegion.Select(p => (p, sides: GetSides(plotsInRegion, p, rows.Length, rows[0].Length))).ToArray();
   }
 
-  static int NumberOfSides((int row, int col) c, List<(int row, int col)> plotsInRegion, int rowsLength, int colsLenght)
+  static Side[] GetSides(List<(int row, int col)> plotsInRegion, (int row, int col) plot, int rowsLength, int colsLenght)
   {
-    return
-      CountSide(c with { row = c.row + 1 }) +
-      CountSide(c with { row = c.row - 1 }) +
-      CountSide(c with { col = c.col + 1}) +
-      CountSide(c with { col = c.col - 1 });
+    return new[] {
+      HasSide(Side.Bottom, plot with { row = plot.row + 1 }),
+      HasSide(Side.Top, plot with { row = plot.row - 1 }),
+      HasSide(Side.Right, plot with { col = plot.col + 1}),
+      HasSide(Side.Left, plot with { col = plot.col - 1})
+    }.Where(x => x != Side.None).ToArray();
 
-    int CountSide((int row, int col) s) => IsOutOfBounds(s, rowsLength, colsLenght ) || !plotsInRegion.Contains(s) ? 1 : 0;
+    Side HasSide(Side side, (int row, int col) s) => IsOutOfBounds(s, rowsLength, colsLenght ) || !plotsInRegion.Contains(s) ? side : Side.None;
   }
+  
+  enum Side { Left, Right, Top, Bottom, None }
 
   static void AddNeighbourPlotsOfSameType(
     (int row, int col) current,
