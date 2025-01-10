@@ -9,6 +9,11 @@ public static class Tools
     ints.Select((_, i) => ints[..i].Concat(ints[(i + 1)..]));
 
 
+  public static char[][] GetRowsAsCharArrays(this string[] lines)
+  {
+    return lines.Select(r => r.ToArray()).ToArray();
+  }
+
   public static string[][] GetRowsAsStringArrays(this string[] lines, string delimiter=" ")
   {
     return lines.Select(x => delimiter == "" ? x.ToStringArray() : x.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)).ToArray();
