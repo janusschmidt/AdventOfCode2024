@@ -8,6 +8,6 @@ public class DirPadType : IPadType
     ['<', 'v', '>'],
   ];
   
-  public int PadRows { get; } = 2;
-  public int PadCols { get; } = 3;
+  public int PadRows => 2;
+  public int PadCols => 3;
 }

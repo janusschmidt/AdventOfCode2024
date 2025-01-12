@@ -10,6 +10,6 @@ public class NumPadType : IPadType
     [' ','0','A']
   ];
   
-  public int PadRows { get; } = 4;
-  public int PadCols { get; } = 3;
+  public int PadRows => 4;
+  public int PadCols => 3;
 }
